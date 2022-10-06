@@ -1,8 +1,9 @@
 param(
-    $Path = "$PSScriptRoot\output"
+    $Path = "$PSScriptRoot\output",
+    [int[]]$YearList = (2022..2015)
 )
 $baseUri = "https://www.churchofjesuschrist.org"
-foreach ($year in 2022..2000) {
+foreach ($year in $YearList) {
     foreach ($month in "10", "04") {
         $page = [System.Net.WebClient]::new().DownloadString("$baseUri/study/general-conference/$year/$month")
         if ([string[]]$links = [regex]::Matches($page, 'href="(/study/general-conference/\d+/\d+/\w+)"').groups | Where-Object name -EQ 1 | Where-Object { $_ -notmatch "video" }) {
