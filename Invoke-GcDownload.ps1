@@ -1,12 +1,15 @@
+[CmdletBinding()]
 param(
     $Path = "$PSScriptRoot\output",
-    [int[]]$YearList = (2022..2015)
+    [int[]]$YearList = (2023..2015),
+    [string[]]$MonthList = ("10", "04")
 )
 $baseUri = "https://www.churchofjesuschrist.org"
 foreach ($year in $YearList) {
-    foreach ($month in "10", "04") {
+    foreach ($month in $MonthList) {
         $page = [System.Net.WebClient]::new().DownloadString("$baseUri/study/general-conference/$year/$month")
-        if ([string[]]$links = [regex]::Matches($page, 'href="(/study/general-conference/\d+/\d+/\w+)"').groups | Where-Object name -EQ 1 | Where-Object { $_ -notmatch "video" }) {
+        if ([string[]]$links = [regex]::Matches($page, 'href="(/study/general-conference/\d+/\d+/\w+)').groups | Where-Object name -EQ 1 | Where-Object { $_ -notmatch "video" }) {
+            "links present $year $month" | Write-Verbose
             $links | ForEach-Object -Parallel {
                 $opt = Invoke-RestMethod "$using:baseUri/study/api/v3/language-pages/type/content?lang=eng&uri=$($_ -replace "/study")"
                 $obj = [PSCustomObject]@{
