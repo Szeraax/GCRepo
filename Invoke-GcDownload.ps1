@@ -8,7 +8,7 @@ $baseUri = "https://www.churchofjesuschrist.org"
 foreach ($year in $YearList) {
     foreach ($month in $MonthList) {
         $page = [System.Net.WebClient]::new().DownloadString("$baseUri/study/general-conference/$year/$month")
-        if ([string[]]$links = [regex]::Matches($page, 'href="(/study/general-conference/\d+/\d+/\w+)').groups | Where-Object name -EQ 1 | Where-Object { $_ -notmatch "video" }) {
+        if ([string[]]$links = [regex]::Matches($page, 'href="(/study/general-conference/\d+/\d+/[\w-]+)').groups | Where-Object name -EQ 1 | Sort-Object -Unique | Where-Object { $_ -notmatch "video|/saturday|/sunday" }) {
             "links present $year $month" | Write-Verbose
             $links | ForEach-Object -Parallel {
                 $opt = Invoke-RestMethod "$using:baseUri/study/api/v3/language-pages/type/content?lang=eng&uri=$($_ -replace "/study")"
@@ -19,7 +19,7 @@ foreach ($year in $YearList) {
                     body        = $opt.content.body -replace "<.*?>" -split "`n" | ForEach-Object Trim | Where-Object { $_ }
                     audio       = $opt.meta.audio[0].mediaUrl
                     pdf         = $opt.meta.pdf.source
-                    link        = "$using:baseUri/$_"
+                    link        = "$using:baseUri/$_" -replace "//", "/"
                     sorting     = $_ -replace ".*/"
                 }
                 $folder = "$using:Path\$using:year-$using:month"
