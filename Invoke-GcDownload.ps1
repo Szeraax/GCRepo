@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     $Path = "$PSScriptRoot\output",
-    [int[]]$YearList = (2023..2015),
+    # We should always check all of the last 10 years if no years specified
+    [int[]]$YearList = (((Get-Date).year)..((Get-Date).year - 10)),
     [string[]]$MonthList = ("10", "04")
 )
 $baseUri = "https://www.churchofjesuschrist.org"
