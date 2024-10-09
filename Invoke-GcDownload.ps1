@@ -6,8 +6,11 @@ param(
     [string[]]$MonthList = ("10", "04")
 )
 $baseUri = "https://www.churchofjesuschrist.org"
+$totalCheck = $YearList.Count * $MonthList.Count
+$i = 0
 foreach ($year in $YearList) {
     foreach ($month in $MonthList) {
+        Write-Progress -Activity Scraping -Status "Checking $year-$month now" -PercentComplete ($i / $totalCheck * 100)
         $page = [System.Net.WebClient]::new().DownloadString("$baseUri/study/general-conference/$year/$month")
         if ([string[]]$links = [regex]::Matches($page, 'href="(/study/general-conference/\d+/\d+/[\w-]+)').groups | Where-Object name -EQ 1 | Sort-Object -Unique | Where-Object { $_ -notmatch "video" }) {
             "links present $year ${month}: $($links.count)" | Write-Verbose
@@ -37,5 +40,7 @@ foreach ($year in $YearList) {
                 $obj | ConvertTo-Json | Out-File "$folder\$($obj.sorting).json" -Force
             }
         }
+        $i++
     }
+    Write-Progress -Activity Scraping -Completed
 }
