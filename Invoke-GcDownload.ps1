@@ -25,7 +25,7 @@ foreach ($year in $YearList) {
                         body        = $opt.content.body -replace "<.*?>" -split "`n" | ForEach-Object Trim | Where-Object { $_ }
                         audio       = if ($opt.meta.audio) { $opt.meta.audio[0].mediaUrl }
                         pdf         = $opt.meta.pdf.source
-                        link        = "$using:baseUri/$_" -replace "//", "/"
+                        link        = "$using:baseUri/$($_ -replace "//", "/" -replace "^/")"
                         sorting     = $_ -replace ".*/"
                     }
                 }
